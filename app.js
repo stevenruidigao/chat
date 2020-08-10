@@ -84,7 +84,7 @@ io.on('connection', (socket) => {
 
 	socket.on('joinRoom', (roomName) => {
 		socket.join(roomName);
-	}
+	});
 
 	socket.on('publicKey', (publicKey) => {
 		if (!socket.publicKey) {
