@@ -1,0 +1,171 @@
+html {
+	margin: 0 0 0 0;
+	height: 100%;
+	width: 100%;
+}
+body {
+	margin: 0 0 0 0;
+	height: 100%;
+	width: 100%;
+	/*overflow: hidden;*/
+}
+h1 {
+	font-size: 200%;
+	/*font-family: Product Sans;*/
+	color: red;
+	text-align: center;
+}
+.hidden {
+	display: none;
+}
+a:visited {
+   color: blue;
+   background-color: transparent;
+   text-decoration: none;
+}
+.img{
+	position: absolute;
+	z-index: 1;
+}
+.card {
+	display: inline-block;
+	left: 0px;
+	top: 0px;
+	width: 63px;
+	height: 88px;
+	background-color: transparent;
+	background-position: center center;
+	background-repeat: no-repeat;
+	background-size: contain; 
+}
+h1, h2, h3, h4, h5, h6, p, form, label {
+	font-family: "Arial";
+}
+#installButton {
+	display: none;
+}
+#enableJS {
+	color: FF0000;
+}
+#chatBar {
+	height: 100%;
+	width: 20%;
+	/*top: 0;*/
+	right: 0;
+	position: fixed;
+	z-index: 1;
+	background-color: white;
+	text-align: center;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
+	display: block;
+}
+#chatTitle {
+	font-family: "Arial";
+	border: none;
+	color: white;
+	background-color: #252525;
+	display: block;
+}
+#hideChat {
+	font-size: 18px;
+	position: relative;
+	left: 10%;
+	border: none;
+	color: white;
+	background-color: #252525;
+	
+}
+#closeChat {
+	font-size: 18px;
+	position: relative;
+	left: 34%;
+	border: none;
+	color: white;
+	background-color: #252525;
+	
+}
+#maximize {
+	/*top: 0;*/
+	right: 0;
+	bottom: 0;
+	position: fixed;
+	z-index: 1;
+	/*background-color: #FFFFFF;*/
+	text-align: center;
+}
+#game {
+	margin: 0 0;
+	display: inline-block;
+}
+#cards {
+	top: 80%;
+	/*bottom: 500px;*/
+	/*vertical-align: bottom;*/
+	position: absolute;
+}
+#canvas {
+	display: inline-block;
+}
+#messages {
+	height: 75%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+#usernameButton {
+	margin: auto;
+}
+#chat {
+	margin: auto;
+	width: 20%;
+	/*display: inline-block;*/
+	bottom: 1%;
+	vertical-align: bottom;
+	position: fixed;
+	/*overflow-y: auto;*/
+}
+#chatInput {
+	width: 80%;
+}
+#footer {
+	/*font-family: Product Sans;*/
+	display: inline-block;
+}
+#copyright {
+	color: blue;
+	background-color: transparent;
+	text-decoration: none;
+	margin-left: 35%;
+	display: inline-block;
+}
+#faq {
+	color: blue;
+	background-color: transparent;
+	text-decoration: none;
+	margin-left: 34.5%;
+	display: inline-block;
+}
+#home {
+	color: blue;
+	background-color: transparent;
+	text-decoration: none;
+	margin-left: 34.5%;
+	display: inline-block;
+}
+@font-face{ 
+	font-family: 'Product Sans';
+	font-display: swap;
+	src: url('/fonts/Product_Sans.woff2') format('woff2'),
+		 url('/fonts/Product_Sans.ttf') format('truetype'),
+		 url('/fonts/Product_Sans.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
+@font-face{ 
+	font-family: 'Arial';
+	font-display: swap;
+	src: url('/fonts/Arial.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}

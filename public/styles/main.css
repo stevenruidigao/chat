@@ -1,0 +1,96 @@
+html {
+	margin: 0 0 0 0;
+	height: 100%;
+	width: 100%;
+}
+
+body {
+	margin: 0 0 0 0;
+	height: 100%;
+	width: 100%;
+}
+
+.hidden {
+	display: none;
+}
+
+.install {
+	display: none;
+}
+
+.chat {
+	height: 75%;
+	width: 20%;
+	right: 0;
+	position: fixed;
+	z-index: 1;
+	background-color: white;
+	text-align: center;
+	border-width: 1px;
+	border-style: solid;
+	border-color: black;
+	display: block;
+}
+
+.chatHeader {
+	border: none;
+	color: white;
+	background-color: #252525;
+	display: block;
+}
+
+.hideChat {
+	font-size: 18px;
+	position: relative;
+	left: 10%;
+	border: none;
+	color: white;
+	background-color: #252525;
+}
+
+.closeChat {
+	font-size: 18px;
+	position: relative;
+	left: 24%;
+	border: none;
+	color: white;
+	background-color: #252525;
+}
+
+.showChat {
+	right: 0;
+	bottom: 0;
+	position: fixed;
+	z-index: 1;
+	text-align: center;
+}
+
+.messages {
+	height: 75%;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+
+.usernameSelector {
+	margin: auto;
+}
+
+.messageInput {
+	margin: auto;
+	width: 20%;
+	bottom: 1%;
+	vertical-align: bottom;
+	position: fixed;
+}
+
+.chatInput {
+	width: 80%;
+}
+
+@font-face{ 
+	font-family: 'Arial';
+	font-display: swap;
+	src: url('/fonts/Arial.woff') format('woff');
+	font-weight: normal;
+	font-style: normal;
+}
