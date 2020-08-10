@@ -15,9 +15,9 @@ app.use(express.static('public'));
 
 // app.set('view engine', 'ejs');
 
-// app.get('/', (req, res){
-	// res.sendFile(__dirname + '/public/index.html');
-// });
+app.get('/room/:ID', (req, res) => {
+	res.sendFile(__dirname + '/public/chat.html');
+});
 
 var rooms = new Map();
 var sockets = new Map();
@@ -28,8 +28,8 @@ io.on('connection', (socket) => {
 
 	});
 
-	socket.on('message', (encyptedMessage) => {
-		
+	socket.on('message', (roomName, encyptedMessage) => {
+		io.to(roomName).emit('message', encryptedMessage);
 	});
 
 	socket.on('name', (name) => {
@@ -42,17 +42,49 @@ io.on('connection', (socket) => {
 		}
 	});
 
-	socket.on('newChat', (publicKeys, secretKey, usernames) => {
-		if (!socket.publicKey) {
+	socket.on('newRoom', (roomName, publicKeys, secretKeys, usernames) => {
+		if (rooms[roomName] || !socket.publicKey) {
+			socket.emit('error');
 			return;
 		}
 
-		for (publicKey of publicKeys) {
+		rooms[roomName] = {
+			chat: chat,
+			name: roomName,
+			publicKeys: publicKeys,
+			secretKeys: secretKeys,
+			usernames: usernames
+		};
+
+		for (i = 0; i < publicKeys.length; i ++) {
+			publicKey = publicKeys[i];
+
 			if (sockets[publicKey].length === 1) {
-				sockets[publicKey]
+				socket = sockets[publicKey];
+
+			} else if (usernames) {
+				for (socket of sockets[publicKey]) {
+					if (socket.name === usernames[i]) {
+						break;
+					}
+
+					socket = null;
+				}
+
+			} else {
+				socket.emit('error');
+			}
+
+			if (socket) {
+				socket.join(roomName);
+				socket.emit('invite', roomName, secretKey[i]);
 			}
 		}
 	});
+
+	socket.on('joinRoom', (roomName) => {
+		socket.join(roomName);
+	}
 
 	socket.on('publicKey', (publicKey) => {
 		if (!socket.publicKey) {

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+	        <link rel="stylesheet" href="/styles/main.css" />
+		<meta name="Description" content="Chat" />
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  		<script src="/socket.io/socket.io.js"></script>
+		<script src="/scripts/client.js"></script>
+		<title>Chat</title>
+	</head>
+	<body oncontextmenu="return false;">
+		<div class="chat">
+			<div class="chatHeader">
+				<h>CHAT</h>
+				<button class="showChat" onclick="showChat()" hidden>+</button>
+				<button class="hideChat" onclick="hideChat()">–</button>
+				<button class="closeChat" onclick="closeChat()">X</button> <br />
+			</div>
+			<div class="usernameSelector" onKeyPress="submitName(event)">
+				What is your nickname? <br />
+				<label for="usernameLabel">Username: 
+					<input class="username" placeholder="Type your name here..." />
+				</label>
+				<button onclick="submitName(0)">Enter</button>
+			</div>
+			<div class="chatMain" hidden>
+				<div class="messages">
+				</div>
+				<div class="messageInput" onKeyPress="submitChat(event)">
+					<label class="chatInputLabel" for="chatInput">Message:
+						<input class="chatInput" placeholder="Type your message here..." />
+					</label>
+				</div>
+			</div>
+		</div>
+		<script>console.log('hi');</script>
+	</body>
+	<script>makeDraggable(document.getElementsByClassName('chat')[0], document.getElementsByClassName('chatHeader')[0]);</script>
+</html>
