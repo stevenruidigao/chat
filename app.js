@@ -16,7 +16,7 @@ app.use(express.static('public'));
 // app.set('view engine', 'ejs');
 
 app.get('/room/:ID', (req, res) => {
-	res.sendFile(__dirname + '/public/chat.html');
+	res.sendFile(__dirname + '/public/index.html');
 });
 
 var rooms = new Map();
@@ -24,46 +24,63 @@ var sockets = new Map();
 var users = new Map();
 
 io.on('connection', (socket) => {
+	socket.emit('connected');
+
 	socket.on('disconnect', () => {
 
 	});
 
-	socket.on('message', (roomName, encyptedMessage) => {
+	socket.on('joinRoom', (roomName) => {
+		socket.join(roomName);
+	});
+
+	socket.on('message', (roomName, encryptedMessage) => {
 		io.to(roomName).emit('message', encryptedMessage);
 	});
 
 	socket.on('name', (name) => {
-		if (name.trim() && socket.publicKey && !socket.name) {
+		if (name.trim() && socket.publicRSAOAEPKey && !socket.name) {
 			if (!users[name]) {
 				users[name] = [];
 			}
 			socket.name = name;
-			users[name].push(socket.publicKey);
+			users[name].push(socket.publicRSAOAEPKey);
 		}
 	});
 
-	socket.on('newRoom', (roomName, publicKeys, secretKeys, usernames) => {
-		if (rooms[roomName] || !socket.publicKey) {
-			socket.emit('error');
+	socket.on('newRoom', (roomName, publicRSAOAEPKeys, secretAESCBCKeys, usernames) => {
+//		console.log(socket.publicRSAOAEPKey);
+
+		if (!socket.publicRSAOAEPKey) {
+			console.log('Error1', socket);
+			socket.emit('checkPublicRSAOAEPKey');
+			return;
+		}
+
+		if (rooms[roomName]) {
+			console.log('Error2');
+			socket.emit('checkName');
 			return;
 		}
 
 		rooms[roomName] = {
-			chat: chat,
+			chat: [],
 			name: roomName,
-			publicKeys: publicKeys,
-			secretKeys: secretKeys,
+			publicRSAOAEPKeys: publicRSAOAEPKeys,
+			secretAESCBCKeys: secretAESCBCKeys,
 			usernames: usernames
 		};
 
-		for (i = 0; i < publicKeys.length; i ++) {
-			publicKey = publicKeys[i];
+		for (i = 0; i < publicRSAOAEPKeys.length; i ++) {
+			publicRSAOAEPKey = publicRSAOAEPKeys[i];
 
-			if (sockets[publicKey].length === 1) {
-				socket = sockets[publicKey];
+//			console.log(sockets, publicRSAOAEPKey);
+
+			if (sockets[publicRSAOAEPKey] && sockets[publicRSAOAEPKey].length === 1) {
+				socket = sockets[publicRSAOAEPKey][0];
 
 			} else if (usernames) {
-				for (socket of sockets[publicKey]) {
+				for (socket of sockets[publicRSAOAEPKey]) {
 					if (socket.name === usernames[i]) {
 						break;
 					}
@@ -72,28 +89,32 @@ io.on('connection', (socket) => {
 				}
 
 			} else {
-				socket.emit('error');
+				console.log('Error3', publicRSAOAEPKey);
+				io.to(publicRSAOAEPKey).emit('invite', roomName, secretAESCBCKeys[i]);
+				socket.emit('userNotFound');
+				return;
 			}
 
 			if (socket) {
 				socket.join(roomName);
-				socket.emit('invite', roomName, secretKey[i]);
+				socket.emit('invite', roomName, secretAESCBCKeys[i]);
 			}
 		}
 	});
 
-	socket.on('joinRoom', (roomName) => {
-		socket.join(roomName);
-	});
-
-	socket.on('publicKey', (publicKey) => {
-		if (!socket.publicKey) {
-			if (!sockets[publicKey]) {
-				sockets[publicKey] = [];
+	socket.on('publicRSAOAEPKey', (publicRSAOAEPKey) => {
+		console.log(publicRSAOAEPKey);
+		if (!socket.publicRSAOAEPKey) {
+			if (!sockets[publicRSAOAEPKey]) {
+				sockets[publicRSAOAEPKey] = [];
 			}
 
-			socket.publicKey = publicKey;
-			sockets[publicKey].push(socket);
+			socket.publicRSAOAEPKey = publicRSAOAEPKey;
+			sockets[publicRSAOAEPKey].push(socket);
+			socket.join(publicRSAOAEPKey, () => {
+				const rooms = Object.keys(socket.rooms);
+				console.log(rooms);
+			});
 		}
 	});
 });

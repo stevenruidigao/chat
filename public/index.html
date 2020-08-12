@@ -2,6 +2,7 @@
 <html lang="en">
 	<head>
 	        <link rel="stylesheet" href="/styles/main.css" />
+		<link rel="manifest" href="/manifest.webmanifest">
 		<meta name="Description" content="Chat" />
 		<meta name="apple-mobile-web-app-capable" content="yes" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,44 +11,32 @@
 		<title>Chat</title>
 	</head>
 	<body oncontextmenu="return false;">
-		<div class="chat 0">
-			<div class="chatHeader 0">
-				<h>CHAT</h>
-				<button class="showChat 0" onclick="showChat(0)" hidden>+</button>
-				<button class="hideChat 0" onclick="hideChat(0)">–</button>
-				<button class="closeChat 0" onclick="closeChat(0)">X</button> <br />
+		<div class="chat">
+			<div class="chatHeader">
+				<h class="chatTitle">CHAT</h>
+				<button class="showChat" onclick="showChat()" hidden>+</button>
+				<button class="hideChat" onclick="hideChat()">–</button>
+				<button class="closeChat" onclick="closeChat()">X</button> <br />
 			</div>
-			<div class="usernameSelector 0" onKeyPress="submitName(event)">
+			<div class="usernameSelector" onKeyPress="submitName(event)">
 				What is your nickname? <br />
-				<label for="username 0">Username: 
-					<input class="username 0" placeholder="Type your name here..." />
+				<label for="usernameLabel">Username: 
+					<input class="username" placeholder="Type your name here..." />
 				</label>
 				<button onclick="submitName(0)">Enter</button>
 			</div>
-			<div class="chatMain 0" hidden>
-				<div class="messages 0">
-				</div>
-				<div class="messageInput 0" onKeyPress="submitChat(event)">
-					<label for="chatInput 0">Message:
-						<input class="chatInput 0" placeholder="Type your message here..." />
+			<div class="chatMain" hidden>
+				<div class="messages"></div>
+				<div class="messageInput" onKeyPress="submitChat(event)">
+					<label class="chatInputLabel" for="chatInput">Message: 
+						<textarea class="chatInput" rows=3 placeholder="Type your message here..."></textarea>
 					</label>
 				</div>
 			</div>
 		</div>
-		<script>
-			loadCookies();
-		</script>
-		<script>
-			if ('serviceWorker' in navigator) {
-				navigator.serviceWorker.register('/sw.js', { scope: '/' })
-				.then(function(registration) {
-					console.log('Service Worker Registered');
-				});
-
-				navigator.serviceWorker.ready.then(function(registration) {
-					console.log('Service Worker Ready');
-				});
-			}
-		</script>
 	</body>
+	<script>
+		makeDraggable(document.getElementsByClassName('chat')[0], document.getElementsByClassName('chatHeader')[0]);
+		loadCookies();
+	</script>
 </html>
