@@ -35,7 +35,8 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('message', (roomName, encryptedMessage) => {
-		io.to(roomName).emit('message', encryptedMessage);
+		console.log(roomName, encryptedMessage);
+		io.to(roomName).emit('message', roomName, encryptedMessage);
 	});
 
 	socket.on('name', (name) => {
@@ -48,7 +49,7 @@ io.on('connection', (socket) => {
 		}
 	});
 
-	socket.on('newRoom', (roomName, publicRSAOAEPKeys, secretAESCBCKeys, usernames) => {
+	socket.on('newRoom', (roomName, publicRSAOAEPKeys, secretHKDFKeys, usernames) => {
 //		console.log(socket.publicRSAOAEPKey);
 
 		if (!socket.publicRSAOAEPKey) {
@@ -67,7 +68,7 @@ io.on('connection', (socket) => {
 			chat: [],
 			name: roomName,
 			publicRSAOAEPKeys: publicRSAOAEPKeys,
-			secretAESCBCKeys: secretAESCBCKeys,
+			secretHKDFKeys: secretHKDFKeys,
 			usernames: usernames
 		};
 
@@ -90,19 +91,20 @@ io.on('connection', (socket) => {
 
 			} else {
 				console.log('Error3', publicRSAOAEPKey);
-				io.to(publicRSAOAEPKey).emit('invite', roomName, secretAESCBCKeys[i]);
+				io.to(publicRSAOAEPKey).emit('invite', roomName, secretHKDFKeys[i]);
 				socket.emit('userNotFound');
 				return;
 			}
 
 			if (socket) {
 				socket.join(roomName);
-				socket.emit('invite', roomName, secretAESCBCKeys[i]);
+				socket.emit('invite', roomName, secretHKDFKeys[i]);
 			}
 		}
 	});
 
 	socket.on('publicRSAOAEPKey', (publicRSAOAEPKey) => {
+		publicRSAOAEPKey = publicRSAOAEPKey.trim();
 		console.log(publicRSAOAEPKey);
 		if (!socket.publicRSAOAEPKey) {
 			if (!sockets[publicRSAOAEPKey]) {
@@ -113,7 +115,7 @@ io.on('connection', (socket) => {
 			sockets[publicRSAOAEPKey].push(socket);
 			socket.join(publicRSAOAEPKey, () => {
 				const rooms = Object.keys(socket.rooms);
-				console.log(rooms);
+//				console.log(rooms);
 			});
 		}
 	});
