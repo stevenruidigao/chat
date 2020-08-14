@@ -24,6 +24,7 @@ socket.on('invite', async (roomName, secretHKDFKey) => {
 		secretHKDFKey: await importHKDFKey(await RSAOAEPDecrypt(secretHKDFKey, (await getKeys()).privateRSAOAEPKey)),
 	}
 
+	window.history.pushState({room: 'Home'}, 'Chat', '/room/' + roomName.encryptedString);
 //	console.log(secretHKDFKeys, await exportAESCBCKey((await HKDFDeriveAESCBCKey(secretHKDFKeys.secretHKDFKey, base64StringToBuffer(base64URLEncode('0')))).secretAESCBCKey), roomName);
 
 	rooms[roomName.encryptedString] = {
@@ -66,6 +67,17 @@ socket.on('message', async (roomName, message) => {
 	socket.emit('updatePublicRSAOAEPKey', getNewKeys().publicRSAOAEPKey);
 	socket.emit('newHKDFKey', await generateHKDFKey().encodedHKDFKey);
 });
+
+function joinRoom(roomName) {
+	socket.emit('joinRoom', roomName);
+	window.history.pushState({room: roomName}, 'Chat', '/room/' + roomName);
+
+	if (!rooms[roomName]) {
+		rooms[roomName] = {
+			messageCount: 0
+		};
+	}
+}
 
 function escapeRegExp(string) {
 	return string.replace(/[.*+\-?^${}()|[\]\\]/g, '\\$&');
@@ -439,7 +451,7 @@ async function createNewRoom(roomName, publicRSAOAEPKeys, usernames) {
 	roomName = await AESCBCEncrypt(roomName, secretAESCBCKey);
 	socket.emit('newRoom', JSON.stringify(roomName), publicRSAOAEPKeys, secretHKDFKeys, usernames);
 
-	window.history.pushState({room: 'Home'}, 'Chat', '/room/' + roomName.encryptedString);
+	window.history.pushState({room: roomName.encryptedString}, 'Chat', '/room/' + roomName.encryptedString);
 	socket.emit('joinRoom', roomName.encryptedString);
 
 	return roomName;

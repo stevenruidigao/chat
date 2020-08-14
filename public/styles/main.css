@@ -10,6 +10,10 @@ body {
 	margin: 0;
 }
 
+p {
+	margin: 0;
+}
+
 .chat {
 	background-color: white;
 	border-color: black;
@@ -41,6 +45,7 @@ body {
 	bottom: 0%;
 	position: absolute;
 	padding: 0px;
+	resize: vertical;
 	vertical-align: bottom;
 	width: 100%;
 }
@@ -137,7 +142,7 @@ body {
 }
 
 .messages {
-	height: 75%;
+	height: 50%;
 	overflow-x: hidden;
 	overflow-y: auto;
 }

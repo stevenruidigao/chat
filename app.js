@@ -90,10 +90,9 @@ io.on('connection', (socket) => {
 				}
 
 			} else {
-				console.log('Error3', publicRSAOAEPKey);
+//				console.log('Error3', publicRSAOAEPKey, sockets[publicRSAOAEPKey]);
 				io.to(publicRSAOAEPKey).emit('invite', roomName, secretHKDFKeys[i]);
 				socket.emit('userNotFound');
-				return;
 			}
 
 			if (socket) {
@@ -104,8 +103,7 @@ io.on('connection', (socket) => {
 	});
 
 	socket.on('publicRSAOAEPKey', (publicRSAOAEPKey) => {
-		publicRSAOAEPKey = publicRSAOAEPKey.trim();
-		console.log(publicRSAOAEPKey);
+//		console.log(publicRSAOAEPKey);
 		if (!socket.publicRSAOAEPKey) {
 			if (!sockets[publicRSAOAEPKey]) {
 				sockets[publicRSAOAEPKey] = [];
@@ -115,7 +113,7 @@ io.on('connection', (socket) => {
 			sockets[publicRSAOAEPKey].push(socket);
 			socket.join(publicRSAOAEPKey, () => {
 				const rooms = Object.keys(socket.rooms);
-//				console.log(rooms);
+				console.log(rooms);
 			});
 		}
 	});
