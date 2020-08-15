@@ -10,7 +10,20 @@
 		<script src="/scripts/client.js"></script>
 		<title>Chat</title>
 	</head>
-	<body oncontextmenu="return false;">
+	<body>
+		<div class="contextMenu" hidden>
+			<p class="editMessage contextMenuChoice">Edit Message</p>
+			<p class="getTrolled contextMenuChoice">Haha LOL get trolled nothing works yet</p>
+		</div>
+		<div class="roomCreator">
+			<label class="roomNameLabel">Room Name: 
+				<input class="roomName" placeholder="Type the room name here..." />
+			</label>
+			<label class="publicKeysLabel">Public Keys: 
+				<input class="publicRSAOAEPKeys" placeholder="Paste the public keys here..." />
+			</label>
+			<button onclick="createRoom()">Create Room</button>
+		</div>
 		<div class="chat">
 			<div class="chatHeader">
 				<h class="chatTitle">CHAT</h>
@@ -37,6 +50,6 @@
 	</body>
 	<script>
 		makeDraggable(document.getElementsByClassName('chat')[0], document.getElementsByClassName('chatHeader')[0]);
-		loadCookies();
+		loadName();
 	</script>
 </html>

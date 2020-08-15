@@ -29,7 +29,7 @@ p {
 	max-width: 100%;
 	min-height: 150px;
 	min-width: 150px;
-	overflow: scroll;
+	overflow-x: scroll;
 	position: absolute;
 	resize: both;
 	text-align: center;
@@ -88,13 +88,14 @@ p {
 	color: white;
 	display: block;
 	height: 4vh;
-	line-heigh: 100%;
+	line-height: 100%;
 	width: 100%;
 	vertical-align: middle;
 }
 
 .chatMain {
 	bottom: 5%;
+	height: 40%;
 }
 
 .chatTitle {
@@ -130,6 +131,26 @@ p {
 	position: relative;
 }
 
+.contextMenu {
+	cursor: click;
+	background: white;
+	border: lightgrey solid 1px;
+	position: absolute;
+	z-index: 100;
+}
+
+.contextMenuChoice {
+	cursor: pointer;
+	background: white;
+	padding: 5px 10px 5px 25px;
+	z-index: 100;
+}
+
+.contextMenuChoice:hover {
+	background: lightgrey;
+}
+
+
 .hidden {
 	display: none;
 }
@@ -142,9 +163,9 @@ p {
 }
 
 .messages {
-	height: 50%;
+	height: 100%;
 	overflow-x: hidden;
-	overflow-y: auto;
+	overflow-y: scroll;
 }
 
 .username .usernameLabel {

@@ -7,13 +7,19 @@ document.onkeydown = handleKeyEvent;
 document.onkeyup = handleKeyEvent;
 
 if (window.location.pathname.includes('room')) {
-	socket.emit('joinRoom', window.location.pathname.split('/')[2]);
+	joinRoom(window.location.pathname.split('/')[2]);
 }
 
 socket.on('connected', async () => {
 	keys = await getKeys();
 
 	socket.emit('publicRSAOAEPKey', (await exportRSAOAEPKeys(keys.publicRSAOAEPKey)).publicRSAOAEPKey);
+
+	body = document.body;
+	keyBox = document.createElement('P');
+	text = document.createTextNode('Your public RSA-OAEP key: ' + (await exportRSAOAEPKeys(keys.publicRSAOAEPKey)).publicRSAOAEPKey);
+	keyBox.appendChild(text);
+	body.appendChild(keyBox);
 });
 
 socket.on('invite', async (roomName, secretHKDFKey) => {
@@ -24,7 +30,8 @@ socket.on('invite', async (roomName, secretHKDFKey) => {
 		secretHKDFKey: await importHKDFKey(await RSAOAEPDecrypt(secretHKDFKey, (await getKeys()).privateRSAOAEPKey)),
 	}
 
-	window.history.pushState({room: 'Home'}, 'Chat', '/room/' + roomName.encryptedString);
+	joinRoom(roomName.encryptedString);
+//	window.history.pushState({room: 'Home'}, 'Chat', '/room/' + roomName.encryptedString);
 //	console.log(secretHKDFKeys, await exportAESCBCKey((await HKDFDeriveAESCBCKey(secretHKDFKeys.secretHKDFKey, base64StringToBuffer(base64URLEncode('0')))).secretAESCBCKey), roomName);
 
 	rooms[roomName.encryptedString] = {
@@ -35,6 +42,10 @@ socket.on('invite', async (roomName, secretHKDFKey) => {
 	};
 
 	console.log(roomName, rooms[roomName.encryptedString], 'dsKey' + await RSAOAEPDecrypt(secretHKDFKey, (await getKeys()).privateRSAOAEPKey), 'sKey: ' + secretHKDFKey);
+});
+
+socket.on('joinedRoom', (roomName) => {
+	console.log('Joined room ' + roomName);
 });
 
 socket.on('message', async (roomName, message) => {
@@ -55,6 +66,7 @@ socket.on('message', async (roomName, message) => {
 	messages = document.getElementsByClassName('messages')[0];
 	autoScroll = messages.scrollHeight - messages.scrollTop < messages.clientHeight + 20;
 	messageBox = document.createElement('P');
+	messageBox.className = 'message';
 	text = document.createTextNode(message);
 
 	messageBox.appendChild(text);
@@ -64,8 +76,12 @@ socket.on('message', async (roomName, message) => {
 		messages.scrollTop = messages.scrollHeight;
 	}
 
-	socket.emit('updatePublicRSAOAEPKey', getNewKeys().publicRSAOAEPKey);
-	socket.emit('newHKDFKey', await generateHKDFKey().encodedHKDFKey);
+//	socket.emit('updatePublicRSAOAEPKey', getNewKeys().publicRSAOAEPKey);
+//	socket.emit('newHKDFKey', await generateHKDFKey().encodedHKDFKey);
+});
+
+socket.on ('pong', () => {
+	console.log('pong');
 });
 
 function joinRoom(roomName) {
@@ -157,6 +173,25 @@ async function HKDFDeriveAESCBCKey(secretHKDFKey, salt) {
 
 	return {
 		secretAESCBCKey: secretAESCBCKey,
+		encodedSecretHKDFKey: encodedSecretHKDFKey,
+		secretHKDFKey: secretHKDFKey
+	};
+}
+
+async function HKDFDeriveAESCBCKeys(secretHKDFKey, start, end) {
+	var info = new ArrayBuffer(0);
+	var secretAESCBCKeys = [];
+	var encodedSecretHKDFKey = null;
+
+	for (i = start; i <= end; i ++) {
+		newKeys = HKDFDeriveAESCBCKey(secretHKDFKey, base64StringToBuffer(base64URLEncode(i.toString())));
+		secretAESCBCKeys.push(newKeys.secretAESCBCKeys);
+		secretHKDFKey = newKeys.secretHKDFKey;
+		encodedSecretHKDFKey = newKeys.encodedSecretHKDFKey;
+	}
+
+	return {
+		secretAESCBCKeys: secretAESCBCKeys,
 		encodedSecretHKDFKey: encodedSecretHKDFKey,
 		secretHKDFKey: secretHKDFKey
 	};
@@ -451,16 +486,34 @@ async function createNewRoom(roomName, publicRSAOAEPKeys, usernames) {
 	roomName = await AESCBCEncrypt(roomName, secretAESCBCKey);
 	socket.emit('newRoom', JSON.stringify(roomName), publicRSAOAEPKeys, secretHKDFKeys, usernames);
 
-	window.history.pushState({room: roomName.encryptedString}, 'Chat', '/room/' + roomName.encryptedString);
-	socket.emit('joinRoom', roomName.encryptedString);
+//	window.history.pushState({room: roomName.encryptedString}, 'Chat', '/room/' + roomName.encryptedString);
+
+//	joinRoom(roomName.encryptedString);
 
 	return roomName;
 }
 
-function loadCookies() {
-	if (document.cookie != '' && document.cookie.split('username=').length >= 2) {
-		name(document.cookie.split('username=')[1].split(';')[0]);
+function loadName() {
+	if (localStorage.username) {
+		name(localStorage.username);
 		hideNamer();
+	}
+}
+
+function addContextMenu(element) {
+	element.oncontextmenu = (event) => {
+		contextMenu = document.getElementsByClassName('contextMenu')[0];
+		contextMenu.style.left = event.clientX + 'px';
+		contextMenu.style.top = event.clientY + 'px';
+		contextMenu.removeAttribute('hidden');
+
+		event.preventDefault();
+		return false;
+	};
+
+	document.body.onclick = () => {
+		contextMenu = document.getElementsByClassName('contextMenu')[0];
+		contextMenu.setAttributeNode(document.createAttribute('hidden'));
 	}
 }
 
@@ -496,8 +549,15 @@ function makeDraggable(element, draggable) {
 }
 
 function name(name) {
+	if (name.replace(/\s/g, '') === '') {
+		name = 'Anonymous';
+	}
 	socket.emit('name', name);
-	document.cookie = 'username=' + name;
+	localStorage.username = name;
+}
+
+function getName() {
+	return localStorage.username;
 }
 
 function hideNamer() {
@@ -514,6 +574,13 @@ function submitName(event) {
 		name(username.value);
 		hideNamer();
 	}
+}
+
+async function createRoom() {
+	var roomName = document.getElementsByClassName('roomName')[0].value;
+	var publicRSAOAEPKeys = replaceAll(document.getElementsByClassName('publicRSAOAEPKeys')[0].value, ' ', '').split(',');
+	publicRSAOAEPKeys.push((await exportRSAOAEPKeys((await getKeys()).publicRSAOAEPKey)).publicRSAOAEPKey);
+	createNewRoom(roomName, publicRSAOAEPKeys);
 }
 
 function base64StringToBuffer(string) {
@@ -547,10 +614,12 @@ async function sendMessage(roomName, message) {
 //		return;
 //	}
 
+	console.log('Sending: ' + message + ' to: ' + roomName);
+
 	if (message.replace(/\s/g, '') != '') {
 		message = JSON.stringify({
 			id: rooms[roomName].messageCount + 1,
-			message: await AESCBCEncrypt(base64URLEncode(message), (await HKDFDeriveAESCBCKey(rooms[roomName].secretHKDFKey, base64StringToBuffer(base64URLEncode(rooms[roomName].messageCount.toString())))).secretAESCBCKey)
+			message: await AESCBCEncrypt(base64URLEncode(getName() + ': ' + message), (await HKDFDeriveAESCBCKey(rooms[roomName].secretHKDFKey, base64StringToBuffer(base64URLEncode(rooms[roomName].messageCount.toString())))).secretAESCBCKey)
 		});
 
 		socket.emit('message', roomName, message);
@@ -585,10 +654,10 @@ function handleKeyEvent(event) {
 }
 
 function hideChat() {
-	chat = document.getElementsByClassName('chat')[0];
-	chatMain = document.getElementsByClassName('chatMain')[0];
-	hideChat = document.getElementsByClassName('hideChat')[0];
-	showChat = document.getElementsByClassName('showChat')[0];
+	var chat = document.getElementsByClassName('chat')[0];
+	var chatMain = document.getElementsByClassName('chatMain')[0];
+	var hideChat = document.getElementsByClassName('hideChat')[0];
+	var showChat = document.getElementsByClassName('showChat')[0];
 	chat.style.prevHeight = chat.style.height;
 	chat.style.prevWidth = chat.style.width;
 	chat.style['min-height'] = '4vh';
@@ -601,15 +670,15 @@ function hideChat() {
 }
 
 function closeChat() {
-	chatBar = document.getElementsByClassName('chat')[0];
+	var chatBar = document.getElementsByClassName('chat')[0];
 	chatBar.style.display = 'none';
 }
 
 function showChat() {
-	chat = document.getElementsByClassName('chat')[0];
-	chatMain = document.getElementsByClassName('chatMain')[0];
-	hideChat = document.getElementsByClassName('hideChat')[0];
-	showChat = document.getElementsByClassName('showChat')[0];
+	var chat = document.getElementsByClassName('chat')[0];
+	var chatMain = document.getElementsByClassName('chatMain')[0];
+	var hideChat = document.getElementsByClassName('hideChat')[0];
+	var showChat = document.getElementsByClassName('showChat')[0];
 	chat.style['min-height'] = '150px';
 	chat.style.height = chat.style.prevHeight;
 	chat.style.resize = 'both';
