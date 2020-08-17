@@ -4,10 +4,13 @@
 	        <link rel="stylesheet" href="/styles/main.css" />
 		<link rel="manifest" href="/manifest.webmanifest">
 		<meta name="Description" content="Chat" />
+		<link rel="apple-touch-icon" href="/images/logo-192x192.png">
 		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="theme-color" content="#252525">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  		<script src="/socket.io/socket.io.js"></script>
-		<script src="/scripts/client.js"></script>
+  		<script src="/socket.io/socket.io.js" defer></script>
+		<script src="/scripts/client.js" defer></script>
+		<script src="/scripts/register.js" defer></script>
 		<title>Chat</title>
 	</head>
 	<body>
@@ -19,38 +22,39 @@
 			<label class="roomNameLabel">Room Name: 
 				<input class="roomName" placeholder="Type the room name here..." />
 			</label>
-			<label class="publicKeysLabel">Public Keys: 
+			<label class="publicRSAOAEPKeysLabel">Public Keys: 
 				<input class="publicRSAOAEPKeys" placeholder="Paste the public keys here..." />
 			</label>
 			<button onclick="createRoom()">Create Room</button>
 		</div>
-		<p><button onclick="getNewKeys()">Generate New Keys</button> - make sure to reload.</p>
-		<div class="chat">
-			<div class="chatHeader">
-				<h class="chatTitle">CHAT</h>
-				<button class="showChat" onclick="showChat()" hidden>+</button>
-				<button class="hideChat" onclick="hideChat()">–</button>
-				<button class="closeChat" onclick="closeChat()">X</button> <br />
+		<label class="publicRSAOAEPKeyLabel" for="publicRSAOAEPKey">Your RSA-OAEP key: <input class="publicRSAOAEPKey" readonly /> </label> <button class="copyPublicRSAOAEPKey" onclick="copyPublicRSAOAEPKey()">Copy</button>
+		<p class="getNewKeysLabel"><button class="getNewKeys" onclick="getNewKeys()">Generate New Keys</button> - make sure to reload.</p>
+		<div class="chat global" onclick="markFocused('global')">
+			<div class="chatHeader global">
+				<h class="chatTitle global">GLOBAL CHAT</h>
+				<button class="showChatButton global" onclick="showChat('global')" hidden>+</button>
+				<button class="hideChatButton global" onclick="hideChat('global')">–</button>
+				<button class="closeChatButton global" onclick="closeChat('global')">X</button> <br />
 			</div>
-			<div class="usernameSelector" onKeyPress="submitName(event)">
+			<div class="usernameSelector global" onKeyPress="submitName(event)">
 				What is your nickname? <br />
-				<label for="usernameLabel">Username: 
-					<input class="username" placeholder="Type your name here..." />
+				<label for="usernameLabel global">Username: 
+					<input class="usernameInput global" placeholder="Type your name here..." />
 				</label>
-				<button onclick="submitName(0)">Enter</button>
+				<button class="usernameButton" onclick="submitName(0)">Enter</button>
 			</div>
-			<div class="chatMain" hidden>
-				<div class="messages"></div>
-				<div class="messageInput" onKeyPress="submitChat(event)">
-					<label class="chatInputLabel" for="chatInput">Message: 
-						<textarea class="chatInput" rows=3 placeholder="Type your message here..."></textarea>
+			<div class="chatMain global" hidden>
+				<div class="warning global">
+					<strong>This chat is NOT encrypted, so use at your own risk! <br />
+					Use this chat for general discussion and maybe to exchange keys.</strong>
+				</div>
+				<div class="messages global"></div>
+				<div class="messageInput global" onKeyPress="submitGlobalChat(event)">
+					<label class="chatInputLabel global" for="chatInput">Message: 
+						<textarea class="chatInput global" rows=3 placeholder="Type your message here..."></textarea>
 					</label>
 				</div>
 			</div>
-		</div>
+		</div> 
 	</body>
-	<script>
-		makeDraggable(document.getElementsByClassName('chat')[0], document.getElementsByClassName('chatHeader')[0]);
-		loadName();
-	</script>
 </html>

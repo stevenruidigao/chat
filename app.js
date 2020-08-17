@@ -7,7 +7,7 @@ var app = express();
 var httpServer = http.createServer(app);
 var io = require('socket.io').listen(httpServer);
 
-httpServer.listen(8080, '0.0.0.0', () => {
+httpServer.listen(8082, '0.0.0.0', () => {
 	console.log('Chat is running... ');
 });
 
@@ -39,6 +39,10 @@ io.on('connection', (socket) => {
 	socket.on('message', (roomName, encryptedMessage) => {
 		console.log(roomName, encryptedMessage);
 		io.to(roomName).emit('message', roomName, encryptedMessage);
+	});
+
+	socket.on('globalMessage', (message) => {
+		io.sockets.emit('globalMessage', message);
 	});
 
 	socket.on('name', (name) => {
@@ -74,8 +78,11 @@ io.on('connection', (socket) => {
 			usernames: usernames
 		};
 
+		console.log(publicRSAOAEPKeys);
+
 		for (i = 0; i < publicRSAOAEPKeys.length; i ++) {
 			publicRSAOAEPKey = publicRSAOAEPKeys[i];
+			invitedSocket = null;
 
 //			console.log(sockets, publicRSAOAEPKey);
 
@@ -91,7 +98,6 @@ io.on('connection', (socket) => {
 				console.log('Error3', publicRSAOAEPKey, sockets[publicRSAOAEPKey]);
 				io.to(publicRSAOAEPKey).emit('invite', roomName, secretHKDFKeys[i]);
 				socket.emit('userNotFound');
-				return;
 			}
 
 			if (invitedSocket) {
